@@ -28,8 +28,11 @@ import {
     Paper,
     Button,
 } from '@mui/material';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import { useRouter } from 'next/router';
 import api from '../utils/axios';
+import Layout from '../components/Layout';
+import SpendingPopup from './spending-quote';
 
 const Analytics = () => {
     const router = useRouter();
@@ -107,173 +110,235 @@ const Analytics = () => {
         </TableContainer>
     );
 
+    const exportToCSV = () => {
+        const sections = [
+            { name: 'Daily Totals', data: dailyData, columns: ['day', 'totalAmount'] },
+            { name: 'Weekly Totals', data: weeklyData, columns: ['week', 'totalAmount'] },
+            { name: 'Category Wise Totals', data: categoryDistribution, columns: ['category', 'totalAmount'] },
+            {
+                name: 'Payment Source Distribution',
+                data: paymentSourceDistribution,
+                columns: ['paymentSource', 'count'],
+            },
+        ];
+
+        let csvContent = '';
+
+        sections.forEach((section) => {
+            if (section.data.length > 0) {
+                // Add section title
+                csvContent += `${section.name}\n`;
+
+                // Add column headers
+                csvContent += `${section.columns.join(',')}\n`;
+
+                // Add rows
+                section.data.forEach((row) => {
+                    const values = section.columns.map((col) => row[col] || 'N/A');
+                    csvContent += `${values.join(',')}\n`;
+                });
+
+                // Add a blank line between sections
+                csvContent += '\n';
+            }
+        });
+
+        // Create a Blob and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'analytics.csv';
+        link.click();
+    };
+
     return (
-        <Box sx={{ padding: 4 }}>
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 4,
-                }}
-            >
-                <Typography variant='h4' fontWeight='bold'>
-                    Expense Analytics
-                </Typography>
-                <Button
-                    variant='contained'
-                    color='primary'
-                    onClick={() => router.push('/')}
-                    sx={{ textTransform: 'none' }}
-                >
-                    Back to Dashboard
-                </Button>
-            </Box>
-
-            {/* Summary Cards */}
-            <Grid container spacing={3} sx={{ marginBottom: 4 }}>
-                {[
-                    { label: 'Total Expenses', value: `₹${summary.totalExpenses || 0}` },
-                    { label: 'Total Categories', value: summary.totalCategories || 0 },
-                    { label: 'Most Spent Category', value: summary.mostSpentCategory || 'N/A' },
-                    { label: 'Most Used Payment Source', value: summary.mostUsedPaymentSource || 'N/A' },
-                ].map((item, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={index}>
-                        <Card sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
-                            <CardContent>
-                                <Typography variant='h6'>{item.label}</Typography>
-                                <Typography variant='h5' fontWeight='bold' color='primary'>
-                                    {item.value}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                ))}
-            </Grid>
-
-            {/* Spending by Category */}
-            <Box sx={{ marginBottom: 6 }}>
-                <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
-                    Spending by Category
-                </Typography>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                        <PieChart width={400} height={400}>
-                            <Pie
-                                data={categoryDistribution}
-                                dataKey='totalAmount'
-                                nameKey='category'
-                                cx='50%'
-                                cy='50%'
-                                outerRadius={150}
-                                label={(entry) => entry.category}
-                            >
-                                {categoryDistribution.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={randomColor()} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend />
-                        </PieChart>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        {renderTable(categoryDistribution, ['Category', 'Total Amount'], ['category', 'totalAmount'])}
-                    </Grid>
+        <Layout
+            actions={
+                <>
+                    <Button
+                        variant='outlined'
+                        color='inherit'
+                        onClick={() => router.push('/')}
+                        sx={{
+                            borderColor: '#fff',
+                            color: '#fff',
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.2)' },
+                        }}
+                    >
+                        Back to Dashboard
+                    </Button>
+                    <Button
+                        variant='text'
+                        onClick={exportToCSV}
+                        startIcon={<SaveAltIcon />}
+                        sx={{
+                            color: '#d1d5db', // Light gray for text
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            '&:hover': {
+                                color: '#ffffff', // Change to white on hover
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)', // Add a subtle hover background
+                            },
+                        }}
+                    >
+                        Export CSV
+                    </Button>
+                </>
+            }
+        >
+            <SpendingPopup />
+            <Box sx={{ padding: 4 }}>
+                {/* Summary Cards */}
+                <Grid container spacing={3} sx={{ marginBottom: 4 }}>
+                    {[
+                        { label: 'Total Expenses', value: `₹${summary.totalExpenses || 0}` },
+                        { label: 'Total Categories', value: summary.totalCategories || 0 },
+                        { label: 'Most Spent Category', value: summary.mostSpentCategory || 'N/A' },
+                        { label: 'Most Used Payment Source', value: summary.mostUsedPaymentSource || 'N/A' },
+                    ].map((item, index) => (
+                        <Grid item xs={12} sm={6} md={3} key={index}>
+                            <Card sx={{ boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)' }}>
+                                <CardContent>
+                                    <Typography variant='h6'>{item.label}</Typography>
+                                    <Typography variant='h5' fontWeight='bold' color='primary'>
+                                        {item.value}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
                 </Grid>
-            </Box>
 
-            {/* Spending by Payment Source */}
-            <Box sx={{ marginBottom: 6 }}>
-                <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
-                    Spending by Payment Source
-                </Typography>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                        <BarChart width={600} height={300} data={paymentSourceDistribution}>
-                            <CartesianGrid strokeDasharray='3 3' />
-                            <XAxis dataKey='paymentSource' />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey='count' fill='#82ca9d' />
-                        </BarChart>
+                {/* Spending by Category */}
+                <Box sx={{ marginBottom: 6 }}>
+                    <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
+                        Spending by Category
+                    </Typography>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={6}>
+                            <PieChart width={400} height={400}>
+                                <Pie
+                                    data={categoryDistribution}
+                                    dataKey='totalAmount'
+                                    nameKey='category'
+                                    cx='50%'
+                                    cy='50%'
+                                    outerRadius={150}
+                                    label={(entry) => entry.category}
+                                >
+                                    {categoryDistribution.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={randomColor()} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                                <Legend />
+                            </PieChart>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            {renderTable(
+                                categoryDistribution,
+                                ['Category', 'Total Amount'],
+                                ['category', 'totalAmount']
+                            )}
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        {renderTable(
-                            paymentSourceDistribution,
-                            ['Payment Source', 'Count'],
-                            ['paymentSource', 'count']
-                        )}
-                    </Grid>
-                </Grid>
-            </Box>
+                </Box>
 
-            {/* Daily Analytics */}
-            <Box sx={{ marginBottom: 6 }}>
-                <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
-                    Daily Insights
-                </Typography>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                        <LineChart width={600} height={300} data={dailyData}>
-                            <CartesianGrid strokeDasharray='3 3' />
-                            <XAxis dataKey='day' />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type='monotone' dataKey='totalAmount' stroke='#8884d8' />
-                        </LineChart>
+                {/* Spending by Payment Source */}
+                <Box sx={{ marginBottom: 6 }}>
+                    <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
+                        Spending by Payment Source
+                    </Typography>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={6}>
+                            <BarChart width={600} height={300} data={paymentSourceDistribution}>
+                                <CartesianGrid strokeDasharray='3 3' />
+                                <XAxis dataKey='paymentSource' />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey='count' fill='#82ca9d' />
+                            </BarChart>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            {renderTable(
+                                paymentSourceDistribution,
+                                ['Payment Source', 'Count'],
+                                ['paymentSource', 'count']
+                            )}
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        {renderTable(dailyData, ['Day', 'Total Amount'], ['day', 'totalAmount'])}
-                    </Grid>
-                </Grid>
-            </Box>
+                </Box>
 
-            {/* Weekly Analytics */}
-            <Box sx={{ marginBottom: 6 }}>
-                <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
-                    Weekly Insights
-                </Typography>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                        <LineChart width={600} height={300} data={weeklyData}>
-                            <CartesianGrid strokeDasharray='3 3' />
-                            <XAxis dataKey='week' />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type='monotone' dataKey='totalAmount' stroke='#82ca9d' />
-                        </LineChart>
+                {/* Daily Analytics */}
+                <Box sx={{ marginBottom: 6 }}>
+                    <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
+                        Daily Insights
+                    </Typography>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={6}>
+                            <LineChart width={600} height={300} data={dailyData}>
+                                <CartesianGrid strokeDasharray='3 3' />
+                                <XAxis dataKey='day' />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type='monotone' dataKey='totalAmount' stroke='#8884d8' />
+                            </LineChart>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            {renderTable(dailyData, ['Day', 'Total Amount'], ['day', 'totalAmount'])}
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        {renderTable(weeklyData, ['Week', 'Total Amount'], ['week', 'totalAmount'])}
-                    </Grid>
-                </Grid>
-            </Box>
+                </Box>
 
-            {/* Monthly Analytics */}
-            <Box>
-                <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
-                    Monthly Insights
-                </Typography>
-                <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                        <LineChart width={600} height={300} data={monthlyData}>
-                            <CartesianGrid strokeDasharray='3 3' />
-                            <XAxis dataKey='month' />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type='monotone' dataKey='totalAmount' stroke='#ffc658' />
-                        </LineChart>
+                {/* Weekly Analytics */}
+                <Box sx={{ marginBottom: 6 }}>
+                    <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
+                        Weekly Insights
+                    </Typography>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={6}>
+                            <LineChart width={600} height={300} data={weeklyData}>
+                                <CartesianGrid strokeDasharray='3 3' />
+                                <XAxis dataKey='week' />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type='monotone' dataKey='totalAmount' stroke='#82ca9d' />
+                            </LineChart>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            {renderTable(weeklyData, ['Week', 'Total Amount'], ['week', 'totalAmount'])}
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        {renderTable(monthlyData, ['Month', 'Total Amount'], ['month', 'totalAmount'])}
+                </Box>
+
+                {/* Monthly Analytics */}
+                <Box>
+                    <Typography variant='h5' sx={{ marginBottom: 2 }} fontWeight='bold'>
+                        Monthly Insights
+                    </Typography>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={6}>
+                            <LineChart width={600} height={300} data={monthlyData}>
+                                <CartesianGrid strokeDasharray='3 3' />
+                                <XAxis dataKey='month' />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type='monotone' dataKey='totalAmount' stroke='#ffc658' />
+                            </LineChart>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            {renderTable(monthlyData, ['Month', 'Total Amount'], ['month', 'totalAmount'])}
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Box>
             </Box>
-        </Box>
+        </Layout>
     );
 };
 

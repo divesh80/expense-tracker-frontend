@@ -6,6 +6,8 @@ import Layout from '../components/Layout';
 import { CircularProgress, Card, CardContent, Typography, Grid, Box, Modal } from '@mui/material';
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
+import SpendingPopup from './spending-quote';
+import { Head } from 'next/document';
 
 const Home = () => {
     const [expenses, setExpenses] = useState([]);
@@ -33,6 +35,17 @@ const Home = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const calculateCurrentMonthExpenses = () => {
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        return expenses
+            .filter((expense) => {
+                const expenseDate = new Date(expense.date);
+                return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
+            })
+            .reduce((sum, expense) => sum + expense.amount, 0);
     };
 
     // Handle creating a new expense
@@ -128,144 +141,161 @@ const Home = () => {
 
     return (
         <Layout>
-            <Typography
-                variant='h3'
-                sx={{
-                    marginTop: 1,
-                    textAlign: 'center',
-                    marginBottom: 1,
-                    fontWeight: 'bold',
-                    color: 'primary.main',
-                }}
-            >
-                Expense Tracker Dashboard
-            </Typography>
-            <Typography
-                variant='subtitle1'
-                sx={{
-                    textAlign: 'center',
-                    color: 'text.secondary',
-                    marginBottom: 2,
-                }}
-            >
-                Track, manage, and analyze your expenses effortlessly.
-            </Typography>
-
-            {/* Dashboard Overview */}
-            <Grid container spacing={4} sx={{ marginBottom: 4 }}>
-                <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ boxShadow: 3 }}>
-                        <CardContent>
-                            <Typography variant='h6' color='text.secondary'>
-                                Total Expenses
-                            </Typography>
-                            <Typography variant='h5'>
-                                ₹{expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ boxShadow: 3 }}>
-                        <CardContent>
-                            <Typography variant='h6' color='text.secondary'>
-                                Total Transactions
-                            </Typography>
-                            <Typography variant='h5'>{expenses.length}</Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ boxShadow: 3 }}>
-                        <CardContent>
-                            <Typography variant='h6' color='text.secondary'>
-                                Categories Used
-                            </Typography>
-                            <Typography variant='h5'>
-                                {Array.from(new Set(expenses.map((e) => e.category))).length}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ boxShadow: 3 }}>
-                        <CardContent>
-                            <Typography variant='h6' color='text.secondary'>
-                                Last Transaction
-                            </Typography>
-                            <Typography variant='body1'>
-                                {expenses[0]?.title || 'N/A'} (₹{expenses[0]?.amount || 0})
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-            </Grid>
-
-            {/* Main Content: Form and List */}
-            <Grid container spacing={4}>
-                {/* Expense Form */}
-                <Grid item xs={12} md={4}>
-                    <Card sx={{ boxShadow: 3 }}>
-                        <CardContent>
-                            <Typography variant='h6' sx={{ marginBottom: 2 }}>
-                                Add New Expense
-                            </Typography>
-                            <ExpenseForm onSubmit={handleCreateExpense} />
-                        </CardContent>
-                    </Card>
-                </Grid>
-
-                {/* Expense List */}
-                <Grid item xs={12} md={8}>
-                    <Card sx={{ boxShadow: 3 }}>
-                        <CardContent>
-                            <Typography variant='h6' sx={{ marginBottom: 2 }}>
-                                Your Expenses
-                            </Typography>
-                            {expenses.length ? (
-                                <ExpenseList
-                                    expenses={expenses}
-                                    onEdit={handleOpenEditModal}
-                                    onDelete={handleDeleteExpense}
-                                />
-                            ) : (
-                                <Typography variant='body1' color='text.secondary'>
-                                    No expenses found. Start by adding a new expense.
-                                </Typography>
-                            )}
-                        </CardContent>
-                    </Card>
-                </Grid>
-            </Grid>
-
-            {/* Edit Expense Modal */}
-            {/* Edit Expense Modal */}
-            <Modal
-                open={isEditModalOpen}
-                onClose={handleCloseEditModal}
-                aria-labelledby='edit-expense-modal'
-                aria-describedby='edit-expense-modal-description'
-            >
+            <SpendingPopup />
+            <Box sx={{ padding: 4, backgroundColor: '#f7f9fc', minHeight: '100vh' }}>
                 <Box
                     sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        p: 4,
-                        borderRadius: 2,
-                        maxWidth: 500,
-                        width: '100%',
+                        textAlign: 'center',
+                        padding: 4,
+                        marginBottom: 4,
+                        background: 'linear-gradient(135deg, #1e88e5, #43a047)',
+                        borderRadius: 3,
+                        boxShadow: '0px 6px 20px rgba(0, 0, 0, 0.15)',
+                        color: '#ffffff',
                     }}
                 >
-                    <Typography id='edit-expense-modal' variant='h6' sx={{ marginBottom: 2 }}>
-                        Edit Expense
+                    {/* Main Header */}
+                    <Typography
+                        variant='h3'
+                        align='center'
+                        sx={{
+                            fontWeight: 'bold',
+                            letterSpacing: '0.5px',
+                            textShadow: '0px 3px 6px rgba(0, 0, 0, 0.3)',
+                            marginBottom: 1,
+                        }}
+                    >
+                        Expense Tracker Dashboard
                     </Typography>
-                    <ExpenseForm onSubmit={handleEditExpense} initialData={editExpense} />
+
+                    {/* Subheading */}
+                    <Typography
+                        variant='subtitle1'
+                        align='center'
+                        sx={{
+                            fontWeight: '300',
+                            fontSize: '1.2rem',
+                            marginBottom: 3,
+                            opacity: 0.9,
+                        }}
+                    >
+                        Track, manage, and analyze your expenses effortlessly.
+                    </Typography>
                 </Box>
-            </Modal>
+
+                {/* Dashboard Overview */}
+                <Grid container spacing={4} sx={{ marginBottom: 4 }}>
+                    {[
+                        {
+                            title: 'Overall Expenses',
+                            value: `₹${expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}`,
+                        },
+                        {
+                            title: 'Expenses (This Month)',
+                            value: `₹${calculateCurrentMonthExpenses().toFixed(2)}`,
+                        },
+                        { title: 'Total Transactions', value: expenses.length },
+                        // {
+                        //     title: 'Categories Used',
+                        //     value: Array.from(new Set(expenses.map((e) => e.category))).length,
+                        // },
+                        {
+                            title: 'Last Transaction',
+                            value: expenses[0] ? `${expenses[0].title} (₹${expenses[0].amount})` : 'N/A',
+                        },
+                    ].map((item, index) => (
+                        <Grid item xs={12} sm={6} md={3} key={index}>
+                            <Card
+                                sx={{
+                                    boxShadow: 3,
+                                    padding: 2,
+                                    background: '#ffffff',
+                                    borderRadius: 2,
+                                    borderLeft: `4px solid ${index % 2 === 0 ? '#1e88e5' : '#43a047'}`,
+                                    transition: 'transform 0.2s ease-in-out',
+                                    '&:hover': {
+                                        transform: 'scale(1.05)',
+                                    },
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography
+                                        variant='h6'
+                                        sx={{ fontWeight: 'bold', color: '#5f6368', marginBottom: 1 }}
+                                    >
+                                        {item.title}
+                                    </Typography>
+                                    <Typography variant='h5' sx={{ fontWeight: 'bold', color: '#1565c0' }}>
+                                        {item.value}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+
+                {/* Main Content: Form and List */}
+                <Grid container spacing={4}>
+                    {/* Expense Form */}
+                    <Grid item xs={12} md={4}>
+                        <Card sx={{ boxShadow: 3, borderRadius: 2, background: '#ffffff' }}>
+                            <ExpenseForm onSubmit={handleCreateExpense} />
+                        </Card>
+                    </Grid>
+
+                    {/* Expense List */}
+                    <Grid item xs={12} md={8}>
+                        <Card sx={{ boxShadow: 3, borderRadius: 2, background: '#ffffff' }}>
+                            <CardContent>
+                                {expenses.length ? (
+                                    <ExpenseList
+                                        expenses={expenses}
+                                        onEdit={handleOpenEditModal}
+                                        onDelete={handleDeleteExpense}
+                                    />
+                                ) : (
+                                    <Typography variant='body1' align='center' color='text.secondary'>
+                                        No expenses found. Start by adding a new expense.
+                                    </Typography>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+
+                {/* Edit Expense Modal */}
+                <Modal
+                    open={isEditModalOpen}
+                    onClose={handleCloseEditModal}
+                    aria-labelledby='edit-expense-modal'
+                    aria-describedby='edit-expense-modal-description'
+                >
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            bgcolor: '#ffffff',
+                            boxShadow: 24,
+                            p: 4,
+                            borderRadius: 2,
+                            maxWidth: 500,
+                            width: '100%',
+                        }}
+                    >
+                        <Typography
+                            id='edit-expense-modal'
+                            variant='h6'
+                            align='center'
+                            sx={{ marginBottom: 2, color: '#1565c0' }}
+                        >
+                            Edit Expense
+                        </Typography>
+                        <ExpenseForm onSubmit={handleEditExpense} initialData={editExpense} />
+                    </Box>
+                </Modal>
+            </Box>
         </Layout>
     );
 };

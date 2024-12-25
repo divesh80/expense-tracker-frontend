@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { TextField, Button, Typography, Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import api from '../utils/axios';
+import SpendingPopup from './spending-quote';
 
 const Auth = () => {
     const [mode, setMode] = useState<'login' | 'signup'>('login'); // Toggle between login and signup
@@ -39,6 +40,7 @@ const Auth = () => {
 
     return (
         <Box sx={{ maxWidth: 400, margin: 'auto', marginTop: 10 }}>
+            <SpendingPopup />
             <Typography variant='h4' sx={{ marginBottom: 4 }}>
                 {mode === 'login' ? 'Login' : 'Signup'}
             </Typography>

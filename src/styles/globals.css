@@ -1,5 +1,200 @@
-body {
+/* Reset Defaults */
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+figure {
     margin: 0;
+    padding: 0;
+}
+
+body {
     font-family: 'Roboto', sans-serif;
-    background-color: #f5f5f5;
+    font-size: 16px;
+    line-height: 1.6;
+    background: linear-gradient(135deg, #f8fafc, #e8f0f7); /* Light, fresh gradient background */
+    color: #333; /* Dark gray for excellent contrast */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/* Global Spacing */
+* {
+    box-sizing: border-box;
+    scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+/* Links */
+a {
+    color: #1e88e5;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #1565c0;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    color: #2c3e50; /* Modern, strong dark blue */
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+h3 {
+    font-size: 1.75rem;
+}
+
+/* Paragraphs */
+p {
+    margin-bottom: 1rem;
+    color: #555; /* Medium gray for better readability */
+}
+
+/* Buttons */
+button,
+.btn {
+    font-family: inherit;
+    font-weight: bold;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button.primary,
+.btn-primary {
+    background: linear-gradient(135deg, #007aff, #00c6ff);
+    color: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+button.primary:hover,
+.btn-primary:hover {
+    background: linear-gradient(135deg, #005ecb, #009ad9);
+}
+
+button.secondary,
+.btn-secondary {
+    background: transparent;
+    border: 2px solid #007aff;
+    color: #007aff;
+}
+
+button.secondary:hover,
+.btn-secondary:hover {
+    background: #007aff;
+    color: #fff;
+}
+
+/* Lists */
+ul,
+ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    list-style-position: outside;
+    color: #444;
+}
+
+li {
+    margin-bottom: 0.5rem;
+}
+
+/* Cards */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Inputs */
+input,
+textarea,
+select {
+    font-family: inherit;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #007aff;
+    box-shadow: 0px 0px 4px rgba(0, 122, 255, 0.3);
+}
+
+/* Navbar */
+.navbar {
+    background: #ffffff;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1rem 2rem;
+}
+
+.navbar a {
+    color: #333;
+    font-weight: bold;
+    margin-right: 1rem;
+    transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+    color: #007aff;
+}
+
+/* Footer */
+footer {
+    background: #f1f5f9;
+    color: #555;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+}
+
+/* Scrollbar (Webkit Only) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #007aff;
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #005ecb;
 }
