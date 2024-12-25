@@ -29,7 +29,7 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
                 <Typography variant='h6'>{title}</Typography>
                 <Typography color='text.secondary'>Category: {category}</Typography>
                 <Typography color='text.secondary'>Payment Source: {paymentSource}</Typography>
-                <Typography variant='body2'>Amount: ${amount.toFixed(2)}</Typography>
+                <Typography variant='body2'>Amount: ₹{amount.toFixed(2)}</Typography>
                 <Typography variant='body2'>Date: {new Date(date).toLocaleDateString()}</Typography>
                 <div>
                     <IconButton onClick={onEdit}>

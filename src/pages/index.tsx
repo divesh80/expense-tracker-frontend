@@ -3,15 +3,18 @@ import { useRouter } from 'next/router';
 import ExpenseList from '../components/ExpenseList';
 import ExpenseForm from '../components/ExpenseForm';
 import Layout from '../components/Layout';
-import { CircularProgress, Card, CardContent, Typography, Grid, Box } from '@mui/material';
+import { CircularProgress, Card, CardContent, Typography, Grid, Box, Modal } from '@mui/material';
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
 
 const Home = () => {
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [editExpense, setEditExpense] = useState(null); // To manage edit functionality
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false); // To toggle modal visibility
     const router = useRouter();
 
+    // Fetch all expenses for the logged-in user
     const fetchExpenses = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -32,9 +35,86 @@ const Home = () => {
         }
     };
 
+    // Handle creating a new expense
+    const handleCreateExpense = async (data) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('You are not logged in.');
+                router.push('/auth');
+                return;
+            }
+
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            await api.post('/expenses', data);
+            toast.success('Expense added successfully!');
+            fetchExpenses();
+        } catch (err) {
+            toast.error('Failed to add expense. Please try again.');
+            console.error('Error adding expense:', err);
+        }
+    };
+
+    // Handle editing an expense
+    const handleEditExpense = async (data) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('You are not logged in.');
+                router.push('/auth');
+                return;
+            }
+
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            await api.put(`/expenses/${editExpense.id}`, data);
+            toast.success('Expense updated successfully!');
+            setEditExpense(null);
+            setIsEditModalOpen(false);
+            fetchExpenses();
+        } catch (err) {
+            if (err.response?.status === 401) {
+                toast.error('Your session has expired. Please log in again.');
+                router.push('/auth');
+            } else {
+                toast.error('Failed to update expense. Please try again.');
+            }
+            console.error('Error updating expense:', err);
+        }
+    };
+
+    // Handle deleting an expense
+    const handleDeleteExpense = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('You are not logged in.');
+                router.push('/auth');
+                return;
+            }
+
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            await api.delete(`/expenses/${id}`);
+            toast.success('Expense deleted successfully!');
+            fetchExpenses();
+        } catch (err) {
+            toast.error('Failed to delete expense. Please try again.');
+            console.error('Error deleting expense:', err);
+        }
+    };
+
     useEffect(() => {
         fetchExpenses();
     }, []);
+
+    const handleOpenEditModal = (expense) => {
+        setEditExpense(expense);
+        setIsEditModalOpen(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setEditExpense(null);
+        setIsEditModalOpen(false);
+    };
 
     if (loading) {
         return (
@@ -80,7 +160,7 @@ const Home = () => {
                                 Total Expenses
                             </Typography>
                             <Typography variant='h5'>
-                                ${expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
+                                ₹{expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -114,7 +194,7 @@ const Home = () => {
                                 Last Transaction
                             </Typography>
                             <Typography variant='body1'>
-                                {expenses[0]?.title || 'N/A'} (${expenses[0]?.amount || 0})
+                                {expenses[0]?.title || 'N/A'} (₹{expenses[0]?.amount || 0})
                             </Typography>
                         </CardContent>
                     </Card>
@@ -130,17 +210,7 @@ const Home = () => {
                             <Typography variant='h6' sx={{ marginBottom: 2 }}>
                                 Add New Expense
                             </Typography>
-                            <ExpenseForm
-                                onSubmit={async (data) => {
-                                    try {
-                                        await api.post('/expenses', data);
-                                        fetchExpenses();
-                                        toast.success('Expense added successfully!');
-                                    } catch (err) {
-                                        toast.error('Failed to add expense. Please try again.');
-                                    }
-                                }}
-                            />
+                            <ExpenseForm onSubmit={handleCreateExpense} />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -153,7 +223,11 @@ const Home = () => {
                                 Your Expenses
                             </Typography>
                             {expenses.length ? (
-                                <ExpenseList expenses={expenses} />
+                                <ExpenseList
+                                    expenses={expenses}
+                                    onEdit={handleOpenEditModal}
+                                    onDelete={handleDeleteExpense}
+                                />
                             ) : (
                                 <Typography variant='body1' color='text.secondary'>
                                     No expenses found. Start by adding a new expense.
@@ -163,6 +237,35 @@ const Home = () => {
                     </Card>
                 </Grid>
             </Grid>
+
+            {/* Edit Expense Modal */}
+            {/* Edit Expense Modal */}
+            <Modal
+                open={isEditModalOpen}
+                onClose={handleCloseEditModal}
+                aria-labelledby='edit-expense-modal'
+                aria-describedby='edit-expense-modal-description'
+            >
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4,
+                        borderRadius: 2,
+                        maxWidth: 500,
+                        width: '100%',
+                    }}
+                >
+                    <Typography id='edit-expense-modal' variant='h6' sx={{ marginBottom: 2 }}>
+                        Edit Expense
+                    </Typography>
+                    <ExpenseForm onSubmit={handleEditExpense} initialData={editExpense} />
+                </Box>
+            </Modal>
         </Layout>
     );
 };

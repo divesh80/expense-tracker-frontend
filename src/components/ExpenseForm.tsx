@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
 
 interface ExpenseFormProps {
     onSubmit: (data: { title: string; amount: number; date: string; category: string; paymentSource: string }) => void;
+    initialData?: { title: string; amount: number; date: string; category: string; paymentSource: string }; // Optional for edit
 }
 
-const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit }) => {
+const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData }) => {
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState('');
@@ -15,14 +16,28 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit }) => {
     const categories = ['Food', 'Transport', 'Entertainment', 'Clothes', 'Electronics', 'Utilities', 'Lend', 'Others'];
     const paymentSources = ['Credit Card', 'Debit Card', 'Cash', 'UPI-Paytm', 'UPI-GPay', 'UPI-PhonePe', 'UPI-Others'];
 
+    // Populate fields with initialData when editing
+    useEffect(() => {
+        if (initialData) {
+            setTitle(initialData.title || '');
+            setAmount(initialData.amount.toString() || '');
+            setDate(initialData.date || '');
+            setCategory(initialData.category || '');
+            setPaymentSource(initialData.paymentSource || '');
+        }
+    }, [initialData]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSubmit({ title, amount: parseFloat(amount), date, category, paymentSource });
-        setTitle('');
-        setAmount('');
-        setDate('');
-        setCategory('');
-        setPaymentSource('');
+        if (!initialData) {
+            // Clear fields only if creating a new expense
+            setTitle('');
+            setAmount('');
+            setDate('');
+            setCategory('');
+            setPaymentSource('');
+        }
     };
 
     return (
@@ -76,7 +91,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit }) => {
                 </Select>
             </FormControl>
             <Button variant='contained' type='submit' sx={{ alignSelf: 'center' }}>
-                Add Expense
+                {initialData ? 'Update Expense' : 'Add Expense'}
             </Button>
         </Box>
     );

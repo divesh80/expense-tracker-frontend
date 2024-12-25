@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { PieChart, Pie, Tooltip, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, Legend } from 'recharts';
+import {
+    PieChart,
+    Pie,
+    Tooltip,
+    Cell,
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    BarChart,
+    Bar,
+    Legend,
+} from 'recharts';
 import {
     Box,
     Typography,
@@ -120,7 +133,7 @@ const Analytics = () => {
             {/* Summary Cards */}
             <Grid container spacing={3} sx={{ marginBottom: 4 }}>
                 {[
-                    { label: 'Total Expenses', value: `$${summary.totalExpenses || 0}` },
+                    { label: 'Total Expenses', value: `₹${summary.totalExpenses || 0}` },
                     { label: 'Total Categories', value: summary.totalCategories || 0 },
                     { label: 'Most Spent Category', value: summary.mostSpentCategory || 'N/A' },
                     { label: 'Most Used Payment Source', value: summary.mostUsedPaymentSource || 'N/A' },
@@ -186,7 +199,11 @@ const Analytics = () => {
                         </BarChart>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        {renderTable(paymentSourceDistribution, ['Payment Source', 'Count'], ['paymentSource', 'count'])}
+                        {renderTable(
+                            paymentSourceDistribution,
+                            ['Payment Source', 'Count'],
+                            ['paymentSource', 'count']
+                        )}
                     </Grid>
                 </Grid>
             </Box>
