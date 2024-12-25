@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import ExpenseList from '../components/ExpenseList';
@@ -7,12 +9,11 @@ import { CircularProgress, Card, CardContent, Typography, Grid, Box, Modal } fro
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
 import SpendingPopup from './spending-quote';
-import { Head } from 'next/document';
 
 const Home = () => {
-    const [expenses, setExpenses] = useState([]);
+    const [expenses, setExpenses] = useState([] as any);
     const [loading, setLoading] = useState(true);
-    const [editExpense, setEditExpense] = useState(null); // To manage edit functionality
+    const [editExpense, setEditExpense] = useState(null as any); // To manage edit functionality
     const [isEditModalOpen, setIsEditModalOpen] = useState(false); // To toggle modal visibility
     const router = useRouter();
 
@@ -41,15 +42,15 @@ const Home = () => {
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
         return expenses
-            .filter((expense) => {
+            .filter((expense: any) => {
                 const expenseDate = new Date(expense.date);
                 return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
             })
-            .reduce((sum, expense) => sum + expense.amount, 0);
+            .reduce((sum: any, expense: any) => sum + expense.amount, 0);
     };
 
     // Handle creating a new expense
-    const handleCreateExpense = async (data) => {
+    const handleCreateExpense = async (data: any) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -69,7 +70,7 @@ const Home = () => {
     };
 
     // Handle editing an expense
-    const handleEditExpense = async (data) => {
+    const handleEditExpense = async (data: any) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -84,7 +85,7 @@ const Home = () => {
             setEditExpense(null);
             setIsEditModalOpen(false);
             fetchExpenses();
-        } catch (err) {
+        } catch (err: any) {
             if (err.response?.status === 401) {
                 toast.error('Your session has expired. Please log in again.');
                 router.push('/auth');
@@ -96,7 +97,7 @@ const Home = () => {
     };
 
     // Handle deleting an expense
-    const handleDeleteExpense = async (id) => {
+    const handleDeleteExpense = async (id: any) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -119,7 +120,7 @@ const Home = () => {
         fetchExpenses();
     }, []);
 
-    const handleOpenEditModal = (expense) => {
+    const handleOpenEditModal = (expense: any) => {
         setEditExpense(expense);
         setIsEditModalOpen(true);
     };
@@ -188,7 +189,7 @@ const Home = () => {
                     {[
                         {
                             title: 'Overall Expenses',
-                            value: `₹${expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}`,
+                            value: `₹${expenses.reduce((sum: any, e: any) => sum + e.amount, 0).toFixed(2)}`,
                         },
                         {
                             title: 'Expenses (This Month)',

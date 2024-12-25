@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import {
     PieChart,
@@ -39,7 +40,7 @@ const Analytics = () => {
     const [dailyData, setDailyData] = useState([]);
     const [weeklyData, setWeeklyData] = useState([]);
     const [monthlyData, setMonthlyData] = useState([]);
-    const [summary, setSummary] = useState({});
+    const [summary, setSummary] = useState({} as any);
     const [categoryDistribution, setCategoryDistribution] = useState([]);
     const [paymentSourceDistribution, setPaymentSourceDistribution] = useState([]);
 
@@ -78,7 +79,7 @@ const Analytics = () => {
 
     const randomColor = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
-    const renderTable = (data, columns, rowNames) => (
+    const renderTable = (data: any[], columns: any[], rowNames: any[]) => (
         <TableContainer
             component={Paper}
             sx={{
