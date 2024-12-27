@@ -164,6 +164,7 @@ const Home = () => {
                             letterSpacing: '0.5px',
                             textShadow: '0px 3px 6px rgba(0, 0, 0, 0.3)',
                             marginBottom: 1,
+                            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }, // Responsive sizes
                         }}
                     >
                         Expense Tracker Dashboard
